@@ -9,15 +9,30 @@
     <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" /> -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
         integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <style>
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 20px;
+        }
+        #btn {
+            font-weight: 700;
+        }
+
+        .green {
+            color: darkgreen;
+        }
+
+        .red {
+            color: darkred;
+        }
+    </style>
 </head>
 
 <body>
-    <div id="clipboard"></div>
-    <!-- <h1>Hello World!</h1>
-    We are using Node.js <span id="node-version"></span>, Chromium
-    <span id="chrome-version"></span>, and Electron
-    <span id="electron-version"></span>. -->
-
+    <h1>Eve Detector</h1>
+    <button id="btn" class="green" onclick="btnTapped()">Check On</button>
+    <div id="clipboard" style="margin-top: 10px;"></div>
 
     <!-- You can also require other files to run in this process -->
     <script src="./dist/renderer.js"></script>

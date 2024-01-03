@@ -5,6 +5,7 @@ import * as path from "path";
 import SqliteService from "./service/sqliteService";
 
 let mainWindow: BrowserWindow | null;
+let clipboard: Clipboard;
 
 function createWindow() {
     // Create the browser window.
@@ -53,15 +54,18 @@ app.on("window-all-closed", () => {
 });
 
 function initIpc() {
-    ipcMain.handle('ping', () => 'pong')
-    // ipcMain.handle('screenshot', (data) => {
-    //     mainWindow.webContents.send('character', data);
-    // })
+    ipcMain.handle('ping', () => 'server started')
 
-    // ipcMain.on('screenshot', (event, arg) => {
-    //     console.log(arg);
-    //     mainWindow.webContents.send('character', arg);
-    // })
+    ipcMain.on('checkName', (event, arg) => {
+        if (arg) {
+            console.log('start');
+            clipboard.start();
+        } else {
+            console.log('stop');
+            clipboard.stop();
+        }
+    })
+
 }
 
 // In this file you can include the rest of your app"s specific main process
@@ -71,7 +75,7 @@ async function main() {
     await SqliteService.init('evetool.sqlite');
 
     const zkillboard = new Zkillboard();
-    new Clipboard(200, async (name) => {
+    clipboard = new Clipboard(200, async (name) => {
         mainWindow.webContents.send('clipboard', name);
         const character = await SqliteService.getCharacter(name);
         let id

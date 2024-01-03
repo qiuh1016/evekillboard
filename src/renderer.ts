@@ -13,3 +13,19 @@ const func = async () => {
 }
 
 func()
+
+let on = true;
+function btnTapped() {
+    console.log(on);
+    
+    if (on) {
+        document.getElementById('btn').innerText = 'Check Off';
+        document.getElementById('btn').className = 'red';
+        ipcRenderer.send('checkName', false);
+    } else {
+        document.getElementById('btn').innerText = 'Check On';
+        document.getElementById('btn').className = 'green';
+        ipcRenderer.send('checkName', true);
+    }
+    on = !on;
+}

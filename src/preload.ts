@@ -23,6 +23,8 @@ window.addEventListener("DOMContentLoaded", () => {
 //     // we can also expose variables, not just functions
 // })
 
+contextBridge.exposeInMainWorld('ipcRenderer', ipcRenderer);
+
 ipcRenderer.on('clipboard', (event, arg) => {
     document.getElementById('clipboard').innerText = arg
 })

@@ -11,10 +11,12 @@ export default class Clipboard {
     constructor(interval: number, cb: (name: string) => void) {
         this.interval = interval;
         this.cb = cb;
+        this.lastText = clipboard.readText();
     }
 
     start() {
         if (this.started) return;
+        this.started = true;
         this.timer = setInterval(() => {
             const text = clipboard.readText();
             if (text === this.lastText) return;
@@ -22,7 +24,7 @@ export default class Clipboard {
             this.lastText = text;
             this.cb(text);
         }, this.interval);
-        this.started = true;
+        return this;
     }
 
     stop() {
