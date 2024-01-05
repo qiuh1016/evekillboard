@@ -11,8 +11,14 @@ export default class Zkillboard {
     }
 
     async getCharacterId(name: string) {
-        const url = `https://zkillboard.com/autocomplete/${name}/`;
-        const data = await fetch(url)
+        const url = `https://zkillboard.com/autocomplete/${encodeURIComponent(name)}/`;
+        console.log(url);
+        const data = await fetch(url, {
+            method: 'GET',
+            headers: {
+                user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            }
+        })
         const arr = await data.json() as Array<SearchResult>;
         if (arr.length === 0) {
             throw new Error('No results found');
@@ -24,3 +30,7 @@ export default class Zkillboard {
     }
 
 }
+
+new Zkillboard().getCharacterId('Vivian Taugrus')
+    .then(id => console.log(id))
+    .catch(e => console.error(e));

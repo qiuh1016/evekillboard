@@ -20,7 +20,7 @@ export default class Clipboard {
         this.timer = setInterval(() => {
             const text = clipboard.readText();
             if (text === this.lastText) return;
-            if (!this.checkName(text)) return;
+            if (!Clipboard.checkName(text)) return;
             this.lastText = text;
             this.cb(text);
         }, this.interval);
@@ -33,10 +33,11 @@ export default class Clipboard {
         this.started = false;
     }
 
-    checkName(name: string) {
+    static checkName(name: string) {
         if (name.length < 3 || name.length > 30) return false;
         if (name.includes('\n')) return false;
-        return true;
+        const pattern = /^[a-zA-Z0-9 ' -]+$/;
+        return pattern.test(name);
     }
 
 }

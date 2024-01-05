@@ -17,7 +17,7 @@ func()
 let on = true;
 function btnTapped() {
     console.log(on);
-    
+
     if (on) {
         document.getElementById('btn').innerText = 'Check Off';
         document.getElementById('btn').className = 'red';
@@ -28,4 +28,8 @@ function btnTapped() {
         ipcRenderer.send('checkName', true);
     }
     on = !on;
+}
+
+function testFunction() {
+    ipcRenderer.send('test', true);
 }

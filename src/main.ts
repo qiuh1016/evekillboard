@@ -3,6 +3,7 @@ import Clipboard from "./eve/clipboard";
 import Zkillboard from "./eve/zkillboard";
 import * as path from "path";
 import SqliteService from "./service/sqliteService";
+import axios from "axios";
 
 let mainWindow: BrowserWindow | null;
 let clipboard: Clipboard;
@@ -66,6 +67,12 @@ function initIpc() {
         }
     })
 
+    ipcMain.on('test', async (event, arg) => {
+        console.log('test');
+        // const data = await axios.get('https://zkillboard.com/autocomplete/Vivian%20Taugrus/')
+        // console.log(data);
+    })
+
 }
 
 // In this file you can include the rest of your app"s specific main process
@@ -78,13 +85,16 @@ async function main() {
     clipboard = new Clipboard(200, async (name) => {
         mainWindow.webContents.send('clipboard', name);
         const character = await SqliteService.getCharacter(name);
+        console.log('sql: ' + character);
         let id
         if (!character) {
             try {
                 id = await zkillboard.getCharacterId(name);
+                console.log('id: ' + id);
                 SqliteService.addInsertTask(name, id);
             } catch (e) {
-                console.log(e);
+                console.log('getId error');
+                console.error(e);
                 return;
             }
         } else {
