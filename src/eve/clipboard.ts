@@ -34,7 +34,7 @@ export default class Clipboard {
     }
 
     static checkName(name: string) {
-        if (name.length < 3 || name.length > 30) return false;
+        if (name.length < 3 || name.length > 50) return false;
         if (name.includes('\n')) return false;
         const pattern = /^[a-zA-Z0-9 ' -]+$/;
         return pattern.test(name);

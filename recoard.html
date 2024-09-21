@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Load and Display Combat Records</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            font-size: 12px;
+        }
+        #fileContent {
+            background-color: #000;
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+            overflow-y: auto;
+            color: #fff
+        }
+        .record {
+            padding: 2px 10px;
+            /* border-bottom: 1px solid #ddd; */
+            /* margin-bottom: 10px; */
+        }
+
+        .timestamp {
+            color: #aaa;
+            font-size: 12px;
+        }
+        .type {
+          margin: 0 10px;
+          color: #e00909;
+          font-weight: 500;
+        }
+        .damage {
+            font-weight: bold;
+        }
+
+        .damage-to {
+            color: #05eeff;
+        }
+        .damage-from {
+            color: #bd0101;
+        }
+        .source {
+            font-weight: bold;
+            margin: 0 5px;
+        }
+        .ship {
+            color: #00aaff;
+        }
+        .weapon {
+            /* font-style: italic; */
+            font-size: 8px;
+            color: #888;
+            margin: 0 5px;
+        }
+    </style>
+  </head>
+  <body>
+
+    <h1>Load and Display Combat Records</h1>
+
+    <input type="file" id="fileInput">
+    <div id="fileContent"></div>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            console.log(file);
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    
+                    // Split file content by new lines to process multiple records
+                    const lines = content.split('\n');
+                    let allRecords = '';
+
+                    const toHits = {};
+                    const fromHits = {};
+                    let fromDamages = 0;
+                    let fromCount = 0;
+                    let toDamages = 0;
+                    let toCount = 0;
+
+                    lines.forEach(line => {
+                      if (!line.includes('combat')) return;
+
+                        if (line.includes('miss')) {
+                          let timestampStart = line.indexOf('[') + 1;
+                          let timestampEnd = line.indexOf(']');
+                          const timestamp = line.substring(timestampStart, timestampEnd).trim();
+                          const rest = line.substring(timestampEnd + 1).replace('(combat)', '').trim();
+                          allRecords += `<div class="record">
+                            <span class="timestamp">${timestamp.substring(10, timestamp.length)}</span>
+                            <span class="type">Combat</span>
+                            <span>${rest}</span>
+                            </div>`;
+                          return;
+                        }
+
+                        let from = false;
+                        if (line.includes('from')) from = true;
+   
+                        // Step 1: Extract the timestamp
+                        let timestampStart = line.indexOf('[') + 1;
+                        let timestampEnd = line.indexOf(']');
+                        const timestamp = line.substring(timestampStart, timestampEnd).trim();
+
+                        // Step 2: Extract damage
+                        let damageStart = line.indexOf('<b>') + 3;
+                        let damageEnd = line.indexOf('</b>', damageStart);
+                        const damage = line.substring(damageStart, damageEnd).trim();
+
+                        // Step 3: Extract the source (name of the attacker)
+                        let sourceText = line.includes('from') ? '<font size=10>from</font> <b>' : '<font size=10>to</font> <b>';
+                        sourceText += '<color=0xffffffff>'
+                        let sourceStart = line.indexOf(sourceText) + sourceText.length; // Start after "from "
+                        let sourceEnd = line.indexOf('</b>', sourceStart); // Look for the first < after "from"
+                        const source = line.substring(sourceStart, sourceEnd).trim();
+
+                        // Step 4: Extract the ship name, which is inside parentheses after the source
+                        const ship = source.substring(source.indexOf('(') + 1, source.indexOf(')'));
+
+                        // Step 5: Extract the weapon, it's after the ship and a hyphen
+                        let weaponStart = line.indexOf('-', sourceEnd) + 2; // Start after the hyphen and space
+                        let weaponEnd = line.indexOf(' - ', weaponStart);
+                        const weapon = line.substring(weaponStart, weaponEnd).trim();
+
+                        // Step 6: Extract the hit quality, it's after the last hyphen
+                        let hitQualityStart = weaponEnd + 3; // Start after the second hyphen and space
+                        const hitQuality = line.substring(hitQualityStart).trim();
+
+                        if (!from && damage > 150) {
+                          toDamages += parseInt(damage);
+                          toCount++;
+                          if (!toHits[hitQuality]) {
+                            toHits[hitQuality] = 1;
+                          } else {
+                            toHits[hitQuality]++;
+                          }
+                        }  
+                        if (from && damage > 100) {
+                          fromDamages += parseInt(damage);
+                          fromCount++;
+                          if (!fromHits[hitQuality]) {
+                            fromHits[hitQuality] = 1;
+                          } else {
+                            fromHits[hitQuality]++;
+                          }
+                        }
+
+                        const formattedRecord = `
+                            <div class="record">
+                                <span class="timestamp">${timestamp.substring(10, timestamp.length)}</span>
+                                <span class="type">Combat</span>
+                                <span class="damage ${from? 'damage-from' : 'damage-to'}">${damage}</span>
+                                <span class="weapon"> ${from ? 'from' : 'to'} </span>
+                                <span class="source">${source}</span>
+                                <span class="weapon"> - ${weapon} - ${hitQuality}</span>
+                            </div>
+                        `;
+                        allRecords += formattedRecord;
+                    });
+
+                    if (allRecords) {
+                        document.getElementById('fileContent').innerHTML += allRecords;
+                    } else {
+                        // document.getElementById('fileContent').innerHTML += 'No valid combat records found.';
+                    }
+
+                    console.log(toHits);
+                    console.log('total damage done:', toDamages);
+                    console.log('total hit done:', toCount);
+                    console.log('avg damage:', toDamages / toCount);
+                    
+                    console.log(fromHits);
+                    console.log('total damage received:', fromDamages);
+                    console.log('total hit received:', fromCount);
+                    console.log('avg damage:', fromDamages / fromCount);
+                };
+                reader.readAsText(file);
+            }
+        });
+    </script>
+
+  </body>
+</html>

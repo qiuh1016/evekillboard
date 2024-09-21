@@ -4,6 +4,7 @@ import Zkillboard from "./eve/zkillboard";
 import * as path from "path";
 import SqliteService from "./service/sqliteService";
 import axios from "axios";
+import { checkEveName } from "./util/util";
 
 let mainWindow: BrowserWindow | null;
 let clipboard: Clipboard;
@@ -120,6 +121,5 @@ async function main() {
         characterWindow.show();
     }
 }
-
 
 main();
